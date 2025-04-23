@@ -54,7 +54,7 @@ def display_chat_page(pipe):
         st.markdown(
             f"""
             <div style='background-color:#E6F7FF; padding:10px; border-radius:10px; margin-bottom:10px;'>
-                <b>🤖 Gemma:</b><br>{st.session_state.current_answer}
+                <b>🤖 Mistral:</b><br>{st.session_state.current_answer}
             </div>
             """,
             unsafe_allow_html=True
