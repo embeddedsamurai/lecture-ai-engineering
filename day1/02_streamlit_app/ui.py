@@ -9,12 +9,12 @@ from metrics import get_metrics_descriptions
 
 # --- チャットページのUI ---
 def display_chat_page(pipe):
-    """チャットページのUIを表示する"""
-    st.subheader("質問を入力してください")
-    user_question = st.text_area("質問", key="question_input", height=100, value=st.session_state.get("current_question", ""))
-    submit_button = st.button("質問を送信")
+    """チャットページのUIを表示する（かわいらしいデザイン）"""
+    st.markdown("<h3 style='color:#D63384;'>📝 質問を入力してください</h3>", unsafe_allow_html=True)
+    user_question = st.text_area(" ", key="question_input", height=100, value=st.session_state.get("current_question", ""))
+    submit_button = st.button("🌸 質問を送信する")
 
-    # セッション状態の初期化（安全のため）
+    # セッション状態の初期化
     if "current_question" not in st.session_state:
         st.session_state.current_question = ""
     if "current_answer" not in st.session_state:
@@ -24,37 +24,56 @@ def display_chat_page(pipe):
     if "feedback_given" not in st.session_state:
         st.session_state.feedback_given = False
 
-    # 質問が送信された場合
+    # 質問送信時の処理
     if submit_button and user_question:
         st.session_state.current_question = user_question
-        st.session_state.current_answer = "" # 回答をリセット
-        st.session_state.feedback_given = False # フィードバック状態もリセット
+        st.session_state.current_answer = ""
+        st.session_state.feedback_given = False
 
-        with st.spinner("モデルが回答を生成中..."):
+        with st.spinner("🌼 モデルが回答を生成中..."):
             answer, response_time = generate_response(pipe, user_question)
             st.session_state.current_answer = answer
             st.session_state.response_time = response_time
-            # ここでrerunすると回答とフィードバックが一度に表示される
             st.rerun()
 
-    # 回答が表示されるべきか判断 (質問があり、回答が生成済みで、まだフィードバックされていない)
+    # チャット表示部分
     if st.session_state.current_question and st.session_state.current_answer:
-        st.subheader("回答:")
-        st.markdown(st.session_state.current_answer) # Markdownで表示
-        st.info(f"応答時間: {st.session_state.response_time:.2f}秒")
+        st.markdown("## 💬 チャット")
+        
+        # ユーザーの質問（ピンクの吹き出し）
+        st.markdown(
+            f"""
+            <div style='background-color:#FFF3F7; padding:10px; border-radius:10px; margin-bottom:10px;'>
+                <b>🧑‍🎓 あなた:</b><br>{st.session_state.current_question}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-        # フィードバックフォームを表示 (まだフィードバックされていない場合)
+        # モデルの回答（水色の吹き出し）
+        st.markdown(
+            f"""
+            <div style='background-color:#E6F7FF; padding:10px; border-radius:10px; margin-bottom:10px;'>
+                <b>🤖 Gemma:</b><br>{st.session_state.current_answer}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        # 応答時間表示（かわいく）
+        st.caption(f"🕒 応答時間: {st.session_state.response_time:.2f} 秒")
+
+        # フィードバックフォーム or 次の質問ボタン
         if not st.session_state.feedback_given:
             display_feedback_form()
         else:
-             # フィードバック送信済みの場合、次の質問を促すか、リセットする
-             if st.button("次の質問へ"):
-                  # 状態をリセット
-                  st.session_state.current_question = ""
-                  st.session_state.current_answer = ""
-                  st.session_state.response_time = 0.0
-                  st.session_state.feedback_given = False
-                  st.rerun() # 画面をクリア
+            if st.button("💡 次の質問へ"):
+                st.session_state.current_question = ""
+                st.session_state.current_answer = ""
+                st.session_state.response_time = 0.0
+                st.session_state.feedback_given = False
+                st.rerun()
+
 
 
 def display_feedback_form():
